@@ -8,6 +8,9 @@ import com.soumya.empl.repository.EmployeeRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,9 +27,10 @@ public class EmployeeService {
         this.repo = repo;
         this.mapper = mapper;
     }
-    public List<Employee> allEmployees(){
+    public Page<Employee> allEmployees(Integer page, Integer size){
+        Pageable pageable = PageRequest.of(page, size);
         logger.info("Fetched all employee details");
-        return repo.findAll();
+        return repo.findAll(pageable);
     }
     public Optional<Employee> getEmp(Long id){
         Optional<Employee> emp = repo.findById(id);

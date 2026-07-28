@@ -8,6 +8,7 @@ import com.soumya.empl.response.ApiResponse;
 import com.soumya.empl.service.EmployeeService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,8 +27,8 @@ public class EmployeeController {
         this.mapper = mapper;
     }
     @GetMapping
-    public ResponseEntity<?> getAllEmployees(){
-        List<Employee> allEmployeesFromDB = service.allEmployees();
+    public ResponseEntity<?> getAllEmployees(@RequestParam(defaultValue = "0") Integer page, @RequestParam(defaultValue = "10") Integer size){
+        Page<Employee> allEmployeesFromDB = service.allEmployees(page, size);
         if(allEmployeesFromDB.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ApiResponse<>(
