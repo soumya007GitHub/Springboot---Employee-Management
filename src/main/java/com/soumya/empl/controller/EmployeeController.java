@@ -1,8 +1,11 @@
 package com.soumya.empl.controller;
 
 import com.soumya.empl.dto.EmployeeDTO;
+import com.soumya.empl.dto.EmployeePatchDTO;
 import com.soumya.empl.entity.Employee;
+import com.soumya.empl.mapper.Mapper;
 import com.soumya.empl.service.EmployeeService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +18,11 @@ import java.util.*;
 @RequestMapping("/api/empl")
 public class EmployeeController {
     private final EmployeeService service;
+    private final Mapper mapper;
     @Autowired
-    public EmployeeController(EmployeeService service){
+    public EmployeeController(EmployeeService service, Mapper mapper){
         this.service = service;
+        this.mapper = mapper;
     }
     @GetMapping
     public ResponseEntity<?> getAllEmployees(){
@@ -27,7 +32,7 @@ public class EmployeeController {
         }
         List<EmployeeDTO> allEmployees = new ArrayList<EmployeeDTO>();
         for (Employee emp : allEmployeesFromDB) {
-            allEmployees.add(new EmployeeDTO(emp.getName(), emp.getEmail(), emp.getPhone(), emp.getDob()));
+            allEmployees.add(mapper.employeeToEmployeeDTO(emp));
         }
         return ResponseEntity.status(HttpStatus.OK).body(allEmployees);
     }
@@ -38,29 +43,30 @@ public class EmployeeController {
         if(op.isEmpty()){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No Employee found with such id "+id);
         }
-        Employee employeeFromDB = op.get();
-        return ResponseEntity.status(HttpStatus.OK).body(new EmployeeDTO(employeeFromDB.getName(), employeeFromDB.getEmail(), employeeFromDB.getPhone(), employeeFromDB.getDob()));
+        return ResponseEntity.status(HttpStatus.OK).body(mapper.employeeToEmployeeDTO(op.get()));
     }
 
     @PostMapping
-    public ResponseEntity<?> addEmployee(@RequestBody Map<String, String> details){
-        if(details.isEmpty() || !details.containsKey("name") || !details.containsKey("email") || !details.containsKey("phone") || !details.containsKey("dob")){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("All fields(Name, Email, Phone, DOB) are mandatory");
-        }
-        Employee emp = service.addEmpl(new EmployeeDTO(details.get("name"), details.get("email"), details.get("phone"), LocalDate.parse(details.get("dob"))));
-        return ResponseEntity.status(HttpStatus.CREATED).body(new EmployeeDTO(emp.getName(), emp.getEmail(), emp.getPhone(), emp.getDob()));
+    public ResponseEntity<?> addEmployee(@Valid @RequestBody EmployeeDTO empl){
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.employeeToEmployeeDTO(service.addEmpl(empl)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @RequestBody Map<String, String> newDetails){
-        if(newDetails.isEmpty()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Request body can't be empty");
-        }
-        Employee emp = service.updateEmpl(id, newDetails);
+    public ResponseEntity<?> updateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeeDTO employeeDTO){
+        Employee emp = service.updateEmpl(id, employeeDTO);
         if(emp == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
         }
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(new EmployeeDTO(emp.getName(), emp.getEmail(), emp.getPhone(), emp.getDob()));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(mapper.employeeToEmployeeDTO(emp));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchUpdateEmployee(@PathVariable Long id, @Valid @RequestBody EmployeePatchDTO patchDTO){
+        Employee emp = service.patchEmpl(id, patchDTO);
+        if(emp == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found");
+        }
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(mapper.employeeToEmployeeDTO(emp));
     }
 
     @DeleteMapping("/{id}")

@@ -1,39 +1,16 @@
 package com.soumya.empl.dto;
 
+
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 
 import java.time.LocalDate;
 
-public class EmployeeDTO {
-    @NotBlank(message = "Name is required")
+public class EmployeePatchDTO {
     private String name;
-
-    @Email(message = "Invalid email address")
-    @NotBlank(message = "Email is required")
+    @Email
     private String email;
-
-    @Pattern(
-            regexp = "^[6-9]\\d{9}$",
-            message = "Phone number must be 10 digits and start with 6-9"
-    )
     private String phone;
-
-    @NotNull(message = "DOB can't be null")
     private LocalDate dob;
-
-    public EmployeeDTO() {
-    }
-
-    public EmployeeDTO(String name, String email, String phone, LocalDate dob) {
-        this.name = name;
-        this.email = email;
-        this.phone = phone;
-        this.dob = dob;
-    }
-
 
     public String getName() {
         return name;
