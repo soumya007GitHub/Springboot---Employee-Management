@@ -6,6 +6,7 @@ import com.soumya.empl.entity.Employee;
 import com.soumya.empl.mapper.Mapper;
 import com.soumya.empl.response.ApiResponse;
 import com.soumya.empl.service.EmployeeService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.*;
 
+@Tag(
+        name = "Employee Management APIs",
+        description = "CRUD operations for managing employees"
+)
 @RestController
 @RequestMapping("/api/empl")
 public class EmployeeController {
